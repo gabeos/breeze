@@ -79,7 +79,7 @@ trait TextReader { self =>
       c = peek();
     }
 
-    if (c < 0)
+    if (c < 0 && builder.length() == 0)
       return null
     if (consumeNewLine)
       readNewline()
