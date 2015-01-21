@@ -10,8 +10,8 @@ import breeze.generic.UFunc
  *
  */
 object dim extends UFunc {
-  implicit def implVDim[T, V <:Vector[T]]: Impl[V,Int] = new Impl[V,Int] {
-    override def apply(v: V): Int = v.length
+  implicit def implVDim[V <:Tensor[_,_]]: Impl[V,Int] = new Impl[V,Int] {
+    override def apply(v: V): Int = v.size
   }
 
   implicit def implMDim[T, M <: Matrix[T]]: Impl[M,(Int,Int)] = new Impl[M,(Int,Int)] {

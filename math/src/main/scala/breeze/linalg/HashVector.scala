@@ -217,7 +217,7 @@ object HashVector extends HashVectorOps
   }
 
   implicit def space[E:Field:ClassTag:Zero]: MutableFiniteCoordinateField[HashVector[E],Int,E] = {
-    implicit val _dim = dim.implVDim[E, HashVector[E]]
+    implicit val _dim = dim.implVDim[HashVector[E]]
     MutableFiniteCoordinateField.make[HashVector[E], Int, E]
   }
 
