@@ -36,13 +36,14 @@ import scala.{specialized=>spec}
  * @author dlwh
  */
 // TODO: maybe put columns in own array of sparse vectors, making slicing easier?
-class CSCMatrix[@spec(Double, Int, Float, Long) V: Zero] (private var _data: Array[V],
-                                                          val rows: Int,
-                                                          val cols: Int,
-                                                          val colPtrs: Array[Int], // len cols + 1
-                                                          private var used : Int,
-                                                          private var _rowIndices: Array[Int]) // len >= used
+class CSCMatrix[@spec(Double, Int, Float, Long) V: Zero] private[linalg] (private var _data: Array[V],
+                                                                               val rows: Int,
+                                                                               val cols: Int,
+                                                                               val colPtrs: Array[Int], // len cols + 1
+                                                                               private var used : Int,
+                                                                               private var _rowIndices: Array[Int]) // len >= used
   extends Matrix[V] with MatrixLike[V, CSCMatrix[V]] with Serializable {
+
 
   def rowIndices = _rowIndices
   def data = _data
@@ -214,6 +215,11 @@ class CSCMatrix[@spec(Double, Int, Float, Long) V: Zero] (private var _data: Arr
     }
   }
 
+
+  override def toDenseMatrix(implicit cm: ClassTag[V], zero: Zero[V]): DenseMatrix[V] = {
+    toDense
+  }
+
   def toDense:DenseMatrix[V] = {
     implicit val ctg = ClassTag(data.getClass.getComponentType).asInstanceOf[ClassTag[V]]
     val res = DenseMatrix.zeros[V](rows, cols)
@@ -349,7 +355,9 @@ object CSCMatrix extends MatrixConstructors[CSCMatrix]
           }
           j += 1
         }
-        assert(transposedMtx.activeSize == from.activeSize)
+        // this doesn't hold if there are zeros in the matrix
+//        assert(transposedMtx.activeSize == from.activeSize,
+//          s"We seem to have lost some elements?!?! ${transposedMtx.activeSize} ${from.activeSize}")
         transposedMtx.result(false, false)
       }
     }

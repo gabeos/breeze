@@ -155,7 +155,7 @@ trait MutableVectorField[V, S] extends VectorField[V, S] with MutableVectorRing[
 /** A [[breeze.math.VectorField]] and a [[breeze.math.LPSpace]] */
 trait LPVectorField[V, S] extends VectorField[V, S] with LPSpace[V, S]
 
-trait MutableLPVectorField[V, S] extends LPVectorField[V, S] with MutableVectorField[V,S] {
+trait MutableLPVectorField[V, S] extends LPVectorField[V, S] with MutableVectorRing[V, S] with MutableInnerProductVectorSpace[V, S] {
   implicit def divIntoVV: OpDiv.InPlaceImpl2[V, V]
 }
 
@@ -163,7 +163,7 @@ trait MutableLPVectorField[V, S] extends LPVectorField[V, S] with MutableVectorF
 trait CoordinateField[V, S] extends LPVectorField[V, S] with Coordinated[V, S] {
 }
 
-trait MutableCoordinateField[V, S] extends CoordinateField[V, S] with MutableLPVectorField[V, S]
+trait MutableCoordinateField[V, S] extends CoordinateField[V, S] with MutableVectorField[V, S]
 
 /**
  * A CoordinateField that has an addressable index set. This set may not be finite, and it may
@@ -683,7 +683,8 @@ object MutableEnumeratedCoordinateField {
 }
 
 object MutableOptimizationSpace {
-  object SparseOptimizationSpace {
+
+  object SparseFieldOptimizationSpace {
     implicit def sparseOptSpace[S:Field:Zero:ClassTag] = {
       val norms = EntrywiseMatrixNorms.make[CSCMatrix[S],S]
       import norms._
@@ -691,11 +692,27 @@ object MutableOptimizationSpace {
     }
   }
 
-  object DenseOptimizationSpace {
+  object DenseFieldOptimizationSpace {
     implicit def denseOptSpace[S:Field:ClassTag] = {
       val norms = EntrywiseMatrixNorms.make[DenseMatrix[S],S]
       import norms._
       make[DenseMatrix[S],DenseVector[S],S](_.asDenseMatrix,_.flatten())
+    }
+  }
+
+  object DenseDoubleOptimizationSpace {
+    implicit def denseDoubleOptSpace = {
+      val norms = EntrywiseMatrixNorms.make[DenseMatrix[Double],Double]
+      import norms.{canNorm_Double,canInnerProduct}
+      make[DenseMatrix[Double], DenseVector[Double], Double](_.asDenseMatrix,_.flatten())
+    }
+  }
+
+  object SparseDoubleOptimizationSpace {
+    implicit def sparseDoubleOptSpace = {
+      val norms = EntrywiseMatrixNorms.make[CSCMatrix[Double],Double]
+      import norms.{canNorm_Double,canInnerProduct}
+      make[CSCMatrix[Double], SparseVector[Double], Double](_.asCSCMatrix,_.flatten())
     }
   }
 
