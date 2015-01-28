@@ -1,5 +1,6 @@
 package breeze.linalg
 
+import breeze.linalg
 import org.scalatest._
 import org.scalatest.junit._
 import org.junit.runner.RunWith
@@ -88,7 +89,16 @@ class SparseVectorTest extends FunSuite {
     assert(m === SparseVector(1, 2, 3, 4, 5))
   }
 
-  test("asCSCMatrix") {
+  test("asCSCMatrix - Lengths") {
+    import org.scalatest.prop.GeneratorDrivenPropertyChecks._
+    import org.scalacheck.Gen
+    forAll((Gen.chooseNum(0, 129, 512, 1024), "length")) { (l: Int) =>
+      assert(SparseVector.tabulate(l)(identity).asCSCMatrix().toDense == linalg.DenseVector.tabulate(l)(identity).toDenseMatrix)
+    }
+  }
+
+  test("asCSCMatrix -- vals") {
+
     val a = SparseVector(1.0,2.0,3.0,4.0)
     val b = SparseVector.zeros[Double](5)
     val c = CSCMatrix.zeros[Double](1,5)
